@@ -1,0 +1,49 @@
+<Page x:Class="ObraFacil.Wpf.Views.Clientes.ClientesListPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="Clientes">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+
+        <!-- Título + Novo -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,12">
+            <TextBlock Text="Clientes" Style="{StaticResource LabelDestaque}" FontSize="20" VerticalAlignment="Center"/>
+            <Button Content="+ Novo Cliente" Style="{StaticResource BtnPrimary}" HorizontalAlignment="Right"
+                    Command="{Binding NovoClienteCommand}" />
+        </DockPanel>
+
+        <!-- Busca -->
+        <TextBox Grid.Row="1" Text="{Binding Busca, UpdateSourceTrigger=PropertyChanged}"
+                 Margin="0,0,0,12" Width="320" HorizontalAlignment="Left"
+                 ToolTip="Buscar por nome ou telefone..." />
+
+        <!-- Grid -->
+        <DataGrid Grid.Row="2" ItemsSource="{Binding Clientes}" SelectedItem="{Binding Selecionado}">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Nome"     Binding="{Binding Nome}"     Width="*" />
+                <DataGridTextColumn Header="Telefone" Binding="{Binding Telefone}" Width="140" />
+                <DataGridTextColumn Header="E-mail"   Binding="{Binding Email}"    Width="200" />
+                <DataGridTextColumn Header="Documento" Binding="{Binding Documento}" Width="140" />
+                <DataGridTemplateColumn Header="Ações" Width="160">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <Button Content="Editar"  Margin="2" Padding="8,3"
+                                        Command="{Binding DataContext.EditarClienteCommand, RelativeSource={RelativeSource AncestorType=Page}}"
+                                        CommandParameter="{Binding}" />
+                                <Button Content="Excluir" Margin="2" Padding="8,3"
+                                        Style="{StaticResource BtnDanger}"
+                                        Command="{Binding DataContext.ExcluirClienteCommand, RelativeSource={RelativeSource AncestorType=Page}}"
+                                        CommandParameter="{Binding}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</Page>

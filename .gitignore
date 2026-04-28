@@ -8,7 +8,10 @@ obj/
 *.db-wal
 *.nupkg
 packages/
+publish/
+installer/output/
 logs/
 *.log
 .DS_Store
 Thumbs.db
+ObraFacilCM.zip

@@ -1,0 +1,49 @@
+<Page x:Class="ObraFacil.Wpf.Views.Configuracoes.ConfiguracoesPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="Configurações">
+    <ScrollViewer Padding="24">
+        <StackPanel MaxWidth="520" HorizontalAlignment="Left">
+            <TextBlock Text="Configurações" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,20"/>
+
+            <!-- Empresa -->
+            <TextBlock Text="Dados da Empresa" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8"/>
+
+            <TextBlock Text="Nome da empresa *" FontWeight="SemiBold"/>
+            <TextBox Text="{Binding NomeEmpresa, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10"/>
+
+            <TextBlock Text="Telefone" FontWeight="SemiBold"/>
+            <TextBox Text="{Binding TelefoneEmpresa, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10"/>
+
+            <TextBlock Text="E-mail" FontWeight="SemiBold"/>
+            <TextBox Text="{Binding EmailEmpresa, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,10"/>
+
+            <TextBlock Text="Endereço" FontWeight="SemiBold"/>
+            <TextBox Text="{Binding EnderecoEmpresa, UpdateSourceTrigger=PropertyChanged}"
+                     Height="50" TextWrapping="Wrap" AcceptsReturn="True" Margin="0,0,0,20"/>
+
+            <!-- Orçamentos -->
+            <TextBlock Text="Orçamentos" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8"/>
+
+            <TextBlock Text="Validade padrão (dias)" FontWeight="SemiBold"/>
+            <TextBox Text="{Binding ValidadePadraoEmDias}" Margin="0,0,0,10" Width="100" HorizontalAlignment="Left"/>
+
+            <TextBlock Text="Próximo número de orçamento" FontWeight="SemiBold"/>
+            <TextBox Text="{Binding ProximoNumeroOrcamento}" Margin="0,0,0,20" Width="100" HorizontalAlignment="Left"/>
+
+            <Button Content="Salvar configurações" Command="{Binding SalvarCommand}"
+                    Width="200" HorizontalAlignment="Left" Padding="10,6"
+                    Background="#1976D2" Foreground="White" BorderThickness="0"/>
+
+            <!-- Backup -->
+            <Separator Margin="0,24,0,16"/>
+            <TextBlock Text="Backup e Restauração" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8"/>
+            <StackPanel Orientation="Horizontal">
+                <Button Content="Exportar Backup" Command="{Binding ExportarBackupCommand}"
+                        Padding="10,6" Margin="0,0,12,0"/>
+                <Button Content="Restaurar Backup" Command="{Binding RestaurarBackupCommand}"
+                        Padding="10,6" Foreground="DarkRed"/>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

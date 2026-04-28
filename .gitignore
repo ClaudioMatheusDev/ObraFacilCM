@@ -1,0 +1,14 @@
+bin/
+obj/
+*.user
+.vs/
+.idea/
+*.db
+*.db-shm
+*.db-wal
+*.nupkg
+packages/
+logs/
+*.log
+.DS_Store
+Thumbs.db

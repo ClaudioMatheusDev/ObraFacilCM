@@ -1,0 +1,43 @@
+<Window x:Class="ObraFacil.Wpf.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="ObraFácilCM" Height="650" Width="1050" MinHeight="500" MinWidth="800"
+        WindowStartupLocation="CenterScreen">
+
+    <Window.Resources>
+        <Style x:Key="NavBtn" TargetType="Button">
+            <Setter Property="Background"       Value="Transparent" />
+            <Setter Property="Foreground"       Value="White" />
+            <Setter Property="BorderThickness"  Value="0" />
+            <Setter Property="Padding"          Value="16,12" />
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
+            <Setter Property="FontSize"         Value="13" />
+            <Setter Property="Cursor"           Value="Hand" />
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#1565C0" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <DockPanel>
+        <!-- Barra lateral -->
+        <StackPanel DockPanel.Dock="Left" Width="180" Background="#1976D2">
+            <TextBlock Text="🏗 ObraFácilCM" Foreground="White" FontSize="17" FontWeight="Bold"
+                       Padding="16,20,16,24" />
+            <Button x:Name="BtnOrcamentos" Content="📋  Orçamentos" Click="NavClick"
+                    Tag="Orcamentos" Style="{StaticResource NavBtn}" />
+            <Button x:Name="BtnClientes"   Content="👤  Clientes"   Click="NavClick"
+                    Tag="Clientes"   Style="{StaticResource NavBtn}" />
+            <Button x:Name="BtnCatalogo"   Content="📦  Catálogo"   Click="NavClick"
+                    Tag="Catalogo"   Style="{StaticResource NavBtn}" />
+            <Button x:Name="BtnConfig"     Content="⚙  Configurações" Click="NavClick"
+                    Tag="Config"     Style="{StaticResource NavBtn}" />
+        </StackPanel>
+
+        <!-- Conteúdo principal -->
+        <Frame x:Name="MainFrame" NavigationUIVisibility="Hidden" />
+    </DockPanel>
+
+</Window>

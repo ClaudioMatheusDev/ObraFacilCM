@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>ObraFacil.Wpf</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ObraFacil.Application\ObraFacil.Application.csproj" />
+    <ProjectReference Include="..\ObraFacil.Infrastructure\ObraFacil.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm"                          Version="8.*" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection"       Version="8.*" />
+  </ItemGroup>
+</Project>

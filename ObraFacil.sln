@@ -1,4 +1,4 @@
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.13.35931.197 d17.13
 MinimumVisualStudioVersion = 10.0.40219.1
@@ -9,6 +9,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ObraFacil.Infrastructure", "src\ObraFacil.Infrastructure\ObraFacil.Infrastructure.csproj", "{A0000001-0000-0000-0000-000000000003}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ObraFacil.Wpf", "src\ObraFacil.Wpf\ObraFacil.Wpf.csproj", "{A0000001-0000-0000-0000-000000000004}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{D0CF5278-FC9E-4DC6-A706-DEC76E7964A8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ObraFacil.Tests", "tests\ObraFacil.Tests\ObraFacil.Tests.csproj", "{9BB49D32-DF4B-4756-83CC-6B46FCF94C64}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -32,8 +36,15 @@ Global
 		{A0000001-0000-0000-0000-000000000004}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A0000001-0000-0000-0000-000000000004}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A0000001-0000-0000-0000-000000000004}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9BB49D32-DF4B-4756-83CC-6B46FCF94C64}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9BB49D32-DF4B-4756-83CC-6B46FCF94C64}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9BB49D32-DF4B-4756-83CC-6B46FCF94C64}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9BB49D32-DF4B-4756-83CC-6B46FCF94C64}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{9BB49D32-DF4B-4756-83CC-6B46FCF94C64} = {D0CF5278-FC9E-4DC6-A706-DEC76E7964A8}
 	EndGlobalSection
 EndGlobal

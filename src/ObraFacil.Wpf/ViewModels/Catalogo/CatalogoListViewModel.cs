@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.Logging;
 using ObraFacil.Application.DTOs;
 using ObraFacil.Application.Interfaces;
 using ObraFacil.Domain.Enums;
@@ -31,7 +32,8 @@ public partial class CatalogoListViewModel : ViewModelBase
 
     public ObservableCollection<ItemCatalogoDto> Itens { get; } = [];
 
-    public CatalogoListViewModel(IItemCatalogoService service)
+    public CatalogoListViewModel(IItemCatalogoService service, ILoggerFactory loggerFactory)
+        : base(loggerFactory)
     {
         _service = service;
         Title    = "Catálogo";

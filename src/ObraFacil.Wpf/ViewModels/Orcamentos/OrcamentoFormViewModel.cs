@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.Logging;
 using ObraFacil.Application.DTOs;
 using ObraFacil.Application.Interfaces;
 using ObraFacil.Domain.Enums;
@@ -29,7 +30,8 @@ public partial class OrcamentoFormViewModel : ViewModelBase
     public ObservableCollection<ItemFormDto>     Itens    { get; }
 
     public OrcamentoFormViewModel(IOrcamentoService orcamentos,
-        IClienteService clientes, IItemCatalogoService catalogo)
+        IClienteService clientes, IItemCatalogoService catalogo,
+        ILoggerFactory loggerFactory) : base(loggerFactory)
     {
         _orcamentos = orcamentos;
         _clientes   = clientes;

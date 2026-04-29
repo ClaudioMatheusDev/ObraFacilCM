@@ -21,9 +21,32 @@ public class BackupService : IBackupService
 
     public async Task RestaurarAsync(string caminhoArquivo, CancellationToken ct = default)
     {
+        if (!File.Exists(caminhoArquivo))
+            throw new FileNotFoundException("Arquivo de backup não encontrado.", caminhoArquivo);
+
         var destino = _db.Database.GetDbConnection().DataSource;
+        var temp    = destino + ".bak";
+
         await _db.Database.CloseConnectionAsync();
-        File.Copy(caminhoArquivo, destino, overwrite: true);
-        await _db.Database.OpenConnectionAsync(ct);
+        try
+        {
+            // Preserva cópia de segurança temporária antes de sobrescrever
+            if (File.Exists(destino))
+                File.Copy(destino, temp, overwrite: true);
+
+            File.Copy(caminhoArquivo, destino, overwrite: true);
+        }
+        catch
+        {
+            // Rollback: restaura o banco original se a cópia falhou
+            if (File.Exists(temp))
+                File.Move(temp, destino, overwrite: true);
+            throw;
+        }
+        finally
+        {
+            if (File.Exists(temp)) File.Delete(temp);
+            await _db.Database.OpenConnectionAsync(ct);
+        }
     }
 }

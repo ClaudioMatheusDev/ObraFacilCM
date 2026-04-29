@@ -67,7 +67,7 @@
                         <DataGridTextColumn Header="Qtd"          Binding="{Binding Quantidade, StringFormat=N2}"    Width="70" />
                         <DataGridTextColumn Header="Valor Unit."  Binding="{Binding PrecoUnitario, StringFormat=C2}" Width="110" />
                         <DataGridTextColumn Header="Desc. Item"   Binding="{Binding DescontoItem, StringFormat=C2}"  Width="100" />
-                        <DataGridTextColumn Header="Subtotal"     Binding="{Binding Subtotal, StringFormat=C2}"      Width="110" />
+                        <DataGridTextColumn Header="Subtotal"     Binding="{Binding Subtotal, StringFormat=C2, Mode=OneWay}" Width="110" IsReadOnly="True"/>
                         <DataGridTemplateColumn Width="60">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>

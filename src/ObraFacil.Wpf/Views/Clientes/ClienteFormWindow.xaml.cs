@@ -35,8 +35,12 @@ public partial class ClienteFormWindow : Window
         _clienteId = id;
         Titulo     = "Editar Cliente";
         var c = await _service.ObterAsync(id);
-        Nome = c.Nome; Telefone = c.Telefone!; Email = c.Email!;
-        Documento = c.Documento!; Endereco = c.Endereco!; Observacoes = c.Observacoes!;
+        Nome = c.Nome;
+        Telefone    = c.Telefone    ?? string.Empty;
+        Email       = c.Email       ?? string.Empty;
+        Documento   = c.Documento   ?? string.Empty;
+        Endereco    = c.Endereco    ?? string.Empty;
+        Observacoes = c.Observacoes ?? string.Empty;
     }
 
     private async void BtnSalvar_Click(object sender, RoutedEventArgs e)

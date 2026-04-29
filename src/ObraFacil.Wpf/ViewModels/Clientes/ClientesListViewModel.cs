@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.Logging;
 using ObraFacil.Application.DTOs;
 using ObraFacil.Application.Interfaces;
 using ObraFacil.Wpf.Views.Clientes;
@@ -16,7 +17,8 @@ public partial class ClientesListViewModel : ViewModelBase
 
     public ObservableCollection<ClienteDto> Clientes { get; } = [];
 
-    public ClientesListViewModel(IClienteService service)
+    public ClientesListViewModel(IClienteService service, ILoggerFactory loggerFactory)
+        : base(loggerFactory)
     {
         _service = service;
         Title    = "Clientes";

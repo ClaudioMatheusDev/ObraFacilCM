@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.Logging;
 using ObraFacil.Application.Interfaces;
 using ObraFacil.Domain.Interfaces;
 using System.Windows;
@@ -18,7 +19,8 @@ public partial class ConfiguracoesViewModel : ViewModelBase
     [ObservableProperty] int     _validadePadraoEmDias  = 15;
     [ObservableProperty] int     _proximoNumeroOrcamento = 1;
 
-    public ConfiguracoesViewModel(IConfiguracaoRepository repo, IBackupService backup)
+    public ConfiguracoesViewModel(IConfiguracaoRepository repo, IBackupService backup,
+        ILoggerFactory loggerFactory) : base(loggerFactory)
     {
         _repo   = repo;
         _backup = backup;

@@ -4,6 +4,8 @@ using ObraFacil.Application.DTOs;
 using ObraFacil.Application.Interfaces;
 using ObraFacil.Domain.Enums;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Windows;
 
 namespace ObraFacil.Wpf.ViewModels.Orcamentos;
@@ -24,16 +26,7 @@ public partial class OrcamentoFormViewModel : ViewModelBase
     [ObservableProperty] string?      _observacoes;
 
     public ObservableCollection<ClienteDto>      Clientes { get; } = [];
-    public ObservableCollection<ItemFormDto>     Itens    { get; } = [];
-
-    // ── Totais calculados ─────────────────────────────────────────────────
-    public decimal Subtotal   => Itens.Sum(i => i.Subtotal);
-    public decimal TotalFinal => Math.Max(0, Subtotal - Desconto);
-
-    partial void OnDescontoChanged(decimal value) { OnPropertyChanged(nameof(TotalFinal)); }
-
-    // ── Resultado para fechar a janela ────────────────────────────────────
-    public event Action? SalvoComSucesso;
+    public ObservableCollection<ItemFormDto>     Itens    { get; }
 
     public OrcamentoFormViewModel(IOrcamentoService orcamentos,
         IClienteService clientes, IItemCatalogoService catalogo)
@@ -42,7 +35,42 @@ public partial class OrcamentoFormViewModel : ViewModelBase
         _clientes   = clientes;
         _catalogo   = catalogo;
         Title       = "Novo Orçamento";
+
+        Itens = [];
+        Itens.CollectionChanged += OnItensCollectionChanged;
     }
+
+    // Propaga mudanças de propriedade de cada item para os totais do VM
+    private void OnItensCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        if (e.NewItems is not null)
+            foreach (ItemFormDto item in e.NewItems)
+                item.PropertyChanged += OnItemPropertyChanged;
+
+        if (e.OldItems is not null)
+            foreach (ItemFormDto item in e.OldItems)
+                item.PropertyChanged -= OnItemPropertyChanged;
+
+        AtualizarTotais();
+    }
+
+    private void OnItemPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName is nameof(ItemFormDto.Subtotal) or
+            nameof(ItemFormDto.Quantidade) or
+            nameof(ItemFormDto.PrecoUnitario) or
+            nameof(ItemFormDto.DescontoItem))
+            AtualizarTotais();
+    }
+
+    // ── Totais calculados ─────────────────────────────────────────────────
+    public decimal Subtotal   => Itens.Sum(i => i.Subtotal);
+    public decimal TotalFinal => Math.Max(0, Subtotal - Desconto);
+
+    partial void OnDescontoChanged(decimal value) => AtualizarTotais();
+
+    // ── Resultado para fechar a janela ────────────────────────────────────
+    public event Action? SalvoComSucesso;
 
     public async Task InicializarAsync()
     {
@@ -150,6 +178,11 @@ public partial class ItemFormDto : ObservableObject
     [ObservableProperty] decimal       _descontoItem;
 
     public decimal Subtotal => Math.Max(0, Quantidade * PrecoUnitario - DescontoItem);
+
+    // Notifica o item para recalcular Subtotal e propaga para os totais do VM
+    partial void OnQuantidadeChanged(decimal value)    => OnPropertyChanged(nameof(Subtotal));
+    partial void OnPrecoUnitarioChanged(decimal value)  => OnPropertyChanged(nameof(Subtotal));
+    partial void OnDescontoItemChanged(decimal value)   => OnPropertyChanged(nameof(Subtotal));
 
     public ItemFormDto(int? itemCatalogoId, string descricao, UnidadeMedida unidade,
         decimal precoUnitario, string? categoria, decimal quantidade, decimal descontoItem)

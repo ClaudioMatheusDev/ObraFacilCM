@@ -59,9 +59,44 @@ public partial class App : System.Windows.Application
         // Migrate + Seed
         using var scope = _services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        await db.Database.EnsureCreatedAsync();
+        await BaselineMigrateAsync(db);
         await DatabaseSeeder.SeedAsync(db);
 
         GetService<MainWindow>().Show();
+    }
+
+    /// <summary>
+    /// Lida com bancos criados antes das migrations (via EnsureCreated).
+    /// Se o banco já existe mas não tem histórico de migrations, registra a
+    /// InitialCreate como aplicada sem tentar recriar as tabelas.
+    /// </summary>
+    private static async Task BaselineMigrateAsync(AppDbContext db)
+    {
+        var canConnect = await db.Database.CanConnectAsync();
+
+        if (canConnect)
+        {
+            // Verifica se a tabela de histórico de migrations já existe
+            var applied = await db.Database.GetAppliedMigrationsAsync();
+            if (!applied.Any())
+            {
+                // Banco criado via EnsureCreated — cria o histórico e baseia a migration inicial
+                await db.Database.ExecuteSqlRawAsync(
+                    """
+                    CREATE TABLE IF NOT EXISTS "__EFMigrationsHistory" (
+                        "MigrationId"    TEXT NOT NULL CONSTRAINT "PK___EFMigrationsHistory" PRIMARY KEY,
+                        "ProductVersion" TEXT NOT NULL
+                    )
+                    """);
+                await db.Database.ExecuteSqlRawAsync(
+                    """
+                    INSERT OR IGNORE INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+                    VALUES ('20260429120925_InitialCreate', '8.0.14')
+                    """);
+            }
+        }
+
+        // Agora é seguro chamar MigrateAsync — aplica somente novas migrations futuras
+        await db.Database.MigrateAsync();
     }
 }

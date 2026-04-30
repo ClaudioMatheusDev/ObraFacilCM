@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using ObraFacil.Application.DTOs;
+using ObraFacil.Application.Interfaces;
 using ObraFacil.Application.Services;
 using ObraFacil.Domain.Entities;
 using ObraFacil.Domain.Enums;
@@ -14,12 +15,13 @@ public class OrcamentoServiceTests
     private readonly IOrcamentoRepository    _orcamentos = Substitute.For<IOrcamentoRepository>();
     private readonly IClienteRepository      _clientes   = Substitute.For<IClienteRepository>();
     private readonly IConfiguracaoRepository _config     = Substitute.For<IConfiguracaoRepository>();
+    private readonly IUnitOfWork             _uow        = Substitute.For<IUnitOfWork>();
     private readonly OrcamentoService        _sut;
 
     public OrcamentoServiceTests()
     {
         _sut = new OrcamentoService(
-            _orcamentos, _clientes, _config,
+            _orcamentos, _clientes, _config, _uow,
             NullLogger<OrcamentoService>.Instance);
     }
 
@@ -104,5 +106,6 @@ public class OrcamentoServiceTests
     }
 
     private static OrcamentoInputDto BuildInputDto(int clienteId) =>
-        new(clienteId, null, 0m, null, null, []);
+        new(clienteId, null, 0m, null, null,
+            [new ItemOrcamentoInputDto(null, "Item Teste", UnidadeMedida.Unidade, 10m, null, 1m, 0m)]);
 }

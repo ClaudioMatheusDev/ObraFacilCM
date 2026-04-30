@@ -6,6 +6,11 @@ using QuestPDF.Infrastructure;
 
 namespace ObraFacil.Infrastructure.Services;
 
+/// <summary>
+/// Implementação de <see cref="IPdfService"/> usando a biblioteca QuestPDF (licença Community).
+/// Gera documentos PDF no formato A4 com cabeçalho da empresa, dados do cliente,
+/// tabela detalhada de itens e linha de totais.
+/// </summary>
 public class PdfService : IPdfService
 {
     private readonly IOrcamentoRepository    _orcamentos;

@@ -10,22 +10,33 @@ using System.IO;
 
 namespace ObraFacil.Wpf.ViewModels.Orcamentos;
 
+/// <summary>
+/// ViewModel da tela de listagem de orçamentos com suporte a filtragem por texto e status,
+/// geração de PDF e exclusão com confirmação.
+/// </summary>
 public partial class OrcamentosListViewModel : ViewModelBase
 {
     private readonly IOrcamentoService _service;
     private readonly IPdfService       _pdf;
 
+    /// <summary>Texto de busca. Ao ser alterado, dispara novo carregamento da lista.</summary>
     [ObservableProperty] string?          _busca;
+
+    /// <summary>Orçamento selecionado na grade.</summary>
     [ObservableProperty] OrcamentoDto?    _selecionado;
 
-    // Filtro de status usando wrapper para o ComboBox
     private StatusOpcao? _statusOpcaoFiltro;
+
+    /// <summary>
+    /// Opção de status selecionada no filtro. Ao mudar, recarrega a lista automaticamente.
+    /// </summary>
     public StatusOpcao? StatusFiltro
     {
         get => _statusOpcaoFiltro;
         set { if (SetProperty(ref _statusOpcaoFiltro, value)) CarregarCommand.Execute(null); }
     }
 
+    /// <summary>Opções de status disponíveis no ComboBox de filtro, incluindo "Todos".</summary>
     public static IList<StatusOpcao> StatusOpcoes { get; } =
     [
         new(null, "Todos"),
@@ -35,8 +46,10 @@ public partial class OrcamentosListViewModel : ViewModelBase
         new(StatusOrcamento.Recusado, "Recusado"),
     ];
 
+    /// <summary>Lista observável de orçamentos exibida na grade.</summary>
     public ObservableCollection<OrcamentoDto> Orcamentos { get; } = [];
 
+    /// <summary>Inicializa o ViewModel com os serviços de orçamento, PDF e a fábrica de loggers.</summary>
     public OrcamentosListViewModel(IOrcamentoService service, IPdfService pdf,
         ILoggerFactory loggerFactory) : base(loggerFactory)
     {
@@ -44,6 +57,7 @@ public partial class OrcamentosListViewModel : ViewModelBase
         Title    = "Orçamentos";
     }
 
+    /// <summary>Carrega a lista de orçamentos aplicando os filtros de busca e status ativos.</summary>
     [RelayCommand]
     public async Task CarregarAsync()
         => await ExecuteSafeAsync(async () =>
@@ -53,6 +67,7 @@ public partial class OrcamentosListViewModel : ViewModelBase
             foreach (var o in lista) Orcamentos.Add(o);
         });
 
+    /// <summary>Abre o formulário para criação de um novo orçamento e recarrega a lista após fechar.</summary>
     [RelayCommand]
     void NovoOrcamento()
     {
@@ -61,6 +76,7 @@ public partial class OrcamentosListViewModel : ViewModelBase
         CarregarCommand.Execute(null);
     }
 
+    /// <summary>Abre o formulário de edição do orçamento selecionado e recarrega a lista após fechar.</summary>
     [RelayCommand]
     void EditarOrcamento(OrcamentoDto? orc)
     {
@@ -71,6 +87,7 @@ public partial class OrcamentosListViewModel : ViewModelBase
         CarregarCommand.Execute(null);
     }
 
+    /// <summary>Gera o PDF do orçamento e o abre com o visualizador padrão do sistema.</summary>
     [RelayCommand]
     async Task GerarPdfAsync(OrcamentoDto? orc)
     {
@@ -84,6 +101,7 @@ public partial class OrcamentosListViewModel : ViewModelBase
         }, "Erro ao gerar PDF.");
     }
 
+    /// <summary>Solicita confirmação e exclui o orçamento informado.</summary>
     [RelayCommand]
     async Task ExcluirOrcamentoAsync(OrcamentoDto? orc)
     {
@@ -100,4 +118,7 @@ public partial class OrcamentosListViewModel : ViewModelBase
 }
 
 /// <summary>Wrapper para exibir StatusOrcamento no ComboBox com opção "Todos" (null).</summary>
+/// <summary>Wrapper de <see cref="StatusOrcamento"/> para exibição em ComboBox com opção "Todos" (valor nulo).</summary>
+/// <param name="Valor">Valor do enum, ou <c>null</c> para representar "Todos".</param>
+/// <param name="Label">Rótulo exibido ao usuário.</param>
 public record StatusOpcao(StatusOrcamento? Valor, string Label);

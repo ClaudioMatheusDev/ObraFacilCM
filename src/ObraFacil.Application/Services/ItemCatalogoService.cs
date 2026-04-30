@@ -8,6 +8,10 @@ using ObraFacil.Domain.Interfaces;
 
 namespace ObraFacil.Application.Services;
 
+/// <summary>
+/// Implementação de <see cref="IItemCatalogoService"/> com validação de entrada,
+/// persistência e mapeamento para DTO.
+/// </summary>
 public class ItemCatalogoService : IItemCatalogoService
 {
     private readonly IItemCatalogoRepository      _repo;

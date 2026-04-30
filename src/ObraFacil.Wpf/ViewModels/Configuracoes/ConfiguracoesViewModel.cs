@@ -7,18 +7,30 @@ using System.Windows;
 
 namespace ObraFacil.Wpf.ViewModels.Configuracoes;
 
+/// <summary>
+/// ViewModel da tela de configurações globais da aplicação.
+/// Carrega e persiste os dados da empresa, prazo de validade padrão e próximo número de orçamento.
+/// Também oferece operações de exportação e restauração de backup do banco SQLite.
+/// </summary>
 public partial class ConfiguracoesViewModel : ViewModelBase
 {
     private readonly IConfiguracaoRepository _repo;
     private readonly IBackupService          _backup;
 
+    /// <summary>Nome fantasia ou razão social exibido no cabeçalho dos PDFs.</summary>
     [ObservableProperty] string  _nomeEmpresa           = string.Empty;
+    /// <summary>Telefone de contato da empresa (opcional).</summary>
     [ObservableProperty] string? _telefoneEmpresa;
+    /// <summary>E-mail de contato da empresa (opcional).</summary>
     [ObservableProperty] string? _emailEmpresa;
+    /// <summary>Endereço da empresa exibido nos orçamentos (opcional).</summary>
     [ObservableProperty] string? _enderecoEmpresa;
+    /// <summary>Prazo de validade padrão para novos orçamentos (dias).</summary>
     [ObservableProperty] int     _validadePadraoEmDias  = 15;
+    /// <summary>Próximo número sequencial a ser atribuído a um orçamento.</summary>
     [ObservableProperty] int     _proximoNumeroOrcamento = 1;
 
+    /// <summary>Inicializa o ViewModel com repositório de configurações, serviço de backup e f\u00e1brica de loggers.</summary>
     public ConfiguracoesViewModel(IConfiguracaoRepository repo, IBackupService backup,
         ILoggerFactory loggerFactory) : base(loggerFactory)
     {
@@ -27,6 +39,7 @@ public partial class ConfiguracoesViewModel : ViewModelBase
         Title   = "Configurações";
     }
 
+    /// <summary>Carrega as configurações do banco e popula as propriedades observáveis.</summary>
     [RelayCommand]
     public async Task CarregarAsync()
         => await ExecuteSafeAsync(async () =>
@@ -40,6 +53,7 @@ public partial class ConfiguracoesViewModel : ViewModelBase
             ProximoNumeroOrcamento  = c.ProximoNumeroOrcamento;
         });
 
+    /// <summary>Persiste as configurações editadas pelo usuário e exibe confirmação.</summary>
     [RelayCommand]
     async Task SalvarAsync()
         => await ExecuteSafeAsync(async () =>
@@ -55,6 +69,7 @@ public partial class ConfiguracoesViewModel : ViewModelBase
             MessageBox.Show("Configurações salvas com sucesso.", "Sucesso");
         });
 
+    /// <summary>Exporta o banco SQLite para a pasta de backups e informa o caminho resultante.</summary>
     [RelayCommand]
     async Task ExportarBackupAsync()
         => await ExecuteSafeAsync(async () =>
@@ -63,6 +78,10 @@ public partial class ConfiguracoesViewModel : ViewModelBase
             MessageBox.Show($"Backup salvo em:\n{path}", "Backup concluído");
         }, "Erro ao exportar backup.");
 
+    /// <summary>
+    /// Solicita ao usuário um arquivo de backup, pede confirmação e restaura o banco SQLite.
+    /// Exibe orientação para reiniciar o aplicativo após a restauração.
+    /// </summary>
     [RelayCommand]
     async Task RestaurarBackupAsync()
         => await ExecuteSafeAsync(async () =>

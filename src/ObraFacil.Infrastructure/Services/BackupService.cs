@@ -6,6 +6,11 @@ using ObraFacil.Infrastructure.Data;
 
 namespace ObraFacil.Infrastructure.Services;
 
+/// <summary>
+/// Implementação de <see cref="IBackupService"/> para exportação e restauração do banco SQLite.
+/// Valida a integridade do arquivo antes de qualquer substituição destrutiva e mantém
+/// uma cópia temporária como rollback em caso de falha na restauração.
+/// </summary>
 public class BackupService : IBackupService
 {
     private readonly AppDbContext _db;

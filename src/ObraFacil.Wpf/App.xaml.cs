@@ -1,3 +1,4 @@
+using Microsoft.Extensions.DependencyInjection;
 using ObraFacil.Wpf.Startup;
 using ObraFacil.Wpf.Views;
 using System.IO;

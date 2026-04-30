@@ -14,12 +14,13 @@ public static class DependencyInjection
     {
         services.AddDbContext<AppDbContext>(opt => opt.UseSqlite($"Data Source={dbPath}"));
 
-        services.AddScoped<IClienteRepository,      ClienteRepository>();
-        services.AddScoped<IItemCatalogoRepository, ItemCatalogoRepository>();
-        services.AddScoped<IOrcamentoRepository,    OrcamentoRepository>();
-        services.AddScoped<IConfiguracaoRepository, ConfiguracaoRepository>();
-        services.AddScoped<IBackupService,          BackupService>();
-        services.AddScoped<IPdfService,             PdfService>();
+        services.AddScoped<IUnitOfWork,                UnitOfWork>();
+        services.AddScoped<IClienteRepository,         ClienteRepository>();
+        services.AddScoped<IItemCatalogoRepository,    ItemCatalogoRepository>();
+        services.AddScoped<IOrcamentoRepository,       OrcamentoRepository>();
+        services.AddScoped<IConfiguracaoRepository,    ConfiguracaoRepository>();
+        services.AddScoped<IBackupService,             BackupService>();
+        services.AddScoped<IPdfService,                PdfService>();
 
         return services;
     }

@@ -8,6 +8,10 @@ using ObraFacil.Domain.Interfaces;
 
 namespace ObraFacil.Application.Services;
 
+/// <summary>
+/// Implementação de <see cref="IOrcamentoService"/> com geração transacional de número sequencial,
+/// congelamento de preços dos itens (snapshot) e validação de desconto contra subtotal.
+/// </summary>
 public class OrcamentoService : IOrcamentoService
 {
     private readonly IOrcamentoRepository      _orcamentos;

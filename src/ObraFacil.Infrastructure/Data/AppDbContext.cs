@@ -3,16 +3,31 @@ using ObraFacil.Domain.Entities;
 
 namespace ObraFacil.Infrastructure.Data;
 
+/// <summary>
+/// Contexto principal do Entity Framework Core para o banco SQLite do ObraFacil.
+/// Define os <see cref="DbSet{TEntity}"/> e as configurações de mapeamento das entidades.
+/// </summary>
 public class AppDbContext : DbContext
 {
+    /// <inheritdoc/>
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
+    /// <summary>Conjunto de clientes cadastrados.</summary>
     public DbSet<Cliente>       Clientes       => Set<Cliente>();
+
+    /// <summary>Conjunto de itens do catálogo (materiais e serviços).</summary>
     public DbSet<ItemCatalogo>  ItensCatalogo  => Set<ItemCatalogo>();
+
+    /// <summary>Conjunto de orçamentos.</summary>
     public DbSet<Orcamento>     Orcamentos     => Set<Orcamento>();
+
+    /// <summary>Conjunto de itens pertencentes a orçamentos.</summary>
     public DbSet<ItemOrcamento> ItensOrcamento => Set<ItemOrcamento>();
+
+    /// <summary>Configurações globais da aplicação (registro único Id = 1).</summary>
     public DbSet<Configuracao>  Configuracoes  => Set<Configuracao>();
 
+    /// <inheritdoc/>
     protected override void OnModelCreating(ModelBuilder mb)
     {
         mb.Entity<Cliente>(e => {

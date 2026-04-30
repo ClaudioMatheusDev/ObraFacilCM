@@ -8,6 +8,10 @@ using System.Text.RegularExpressions;
 
 namespace ObraFacil.Application.Services;
 
+/// <summary>
+/// Implementação de <see cref="IClienteService"/> com validação de dados de entrada,
+/// mapeamento de entidades para DTOs e registro de log das operações.
+/// </summary>
 public class ClienteService : IClienteService
 {
     private readonly IClienteRepository      _repo;

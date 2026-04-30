@@ -6,14 +6,21 @@ using ObraFacil.Infrastructure.Data;
 
 namespace ObraFacil.Infrastructure.Repositories;
 
+/// <summary>
+/// Repositório concreto de <see cref="Orcamento"/> com suporte a eager-loading de itens e cliente,
+/// filtragem avançada e geração de número sequencial.
+/// </summary>
 public class OrcamentoRepository : RepositoryBase<Orcamento>, IOrcamentoRepository
 {
+    /// <summary>Inicializa o repositório com o contexto de banco de dados.</summary>
     public OrcamentoRepository(AppDbContext db) : base(db) { }
 
+    /// <inheritdoc/>
     public async Task<Orcamento?> GetComItensAsync(int id, CancellationToken ct = default)
         => await _db.Orcamentos.Include(o => o.Cliente).Include(o => o.Itens)
             .FirstOrDefaultAsync(o => o.Id == id, ct);
 
+    /// <inheritdoc/>
     public async Task<IList<Orcamento>> FiltrarAsync(string? termo = null,
         StatusOrcamento? status = null, DateTime? de = null, DateTime? ate = null,
         CancellationToken ct = default)
@@ -27,6 +34,7 @@ public class OrcamentoRepository : RepositoryBase<Orcamento>, IOrcamentoReposito
         return await q.OrderByDescending(o => o.DataEmissao).ToListAsync(ct);
     }
 
+    /// <inheritdoc/>
     public async Task<string> GerarProximoNumeroAsync(CancellationToken ct = default)
     {
         var cfg = await _db.Configuracoes.FindAsync([1], ct) ?? new Domain.Entities.Configuracao();

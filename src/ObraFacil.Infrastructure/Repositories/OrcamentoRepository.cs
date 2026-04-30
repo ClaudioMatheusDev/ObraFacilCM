@@ -18,7 +18,7 @@ public class OrcamentoRepository : RepositoryBase<Orcamento>, IOrcamentoReposito
         StatusOrcamento? status = null, DateTime? de = null, DateTime? ate = null,
         CancellationToken ct = default)
     {
-        var q = _db.Orcamentos.Include(o => o.Cliente).AsNoTracking().AsQueryable();
+        var q = _db.Orcamentos.Include(o => o.Cliente).Include(o => o.Itens).AsNoTracking().AsQueryable();
         if (!string.IsNullOrWhiteSpace(termo))
             q = q.Where(o => o.Numero.Contains(termo) || o.Cliente.Nome.Contains(termo));
         if (status.HasValue) q = q.Where(o => o.Status == status.Value);

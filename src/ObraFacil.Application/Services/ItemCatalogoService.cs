@@ -70,12 +70,7 @@ public class ItemCatalogoService : IItemCatalogoService
     }
 
     private static void ValidarDto(ItemCatalogoInputDto dto)
-    {
-        if (string.IsNullOrWhiteSpace(dto.Nome))
-            throw new ObraFacilException("Nome do item é obrigatório.");
-        if (dto.PrecoUnitario < 0)
-            throw new ObraFacilException("Preço não pode ser negativo.");
-    }
+        => DtoValidator.Validar(dto);
 
     private static ItemCatalogoDto ToDto(ItemCatalogo i) =>
         new(i.Id, i.Tipo, i.Nome, i.Descricao, i.Unidade, i.PrecoUnitario, i.Categoria, i.Ativo);

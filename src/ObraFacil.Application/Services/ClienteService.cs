@@ -71,8 +71,8 @@ public class ClienteService : IClienteService
 
     private static void ValidarDto(ClienteInputDto dto)
     {
-        if (string.IsNullOrWhiteSpace(dto.Nome))
-            throw new ObraFacilException("Nome do cliente é obrigatório.");
+        DtoValidator.Validar(dto);
+        // Email: reforça via MailAddress (mais estrita que EmailAddressAttribute)
         if (!string.IsNullOrEmpty(dto.Email) && !IsEmailValido(dto.Email.Trim()))
             throw new ObraFacilException("E-mail informado é inválido.");
         if (!string.IsNullOrEmpty(dto.Telefone) && !IsTelefoneValido(dto.Telefone))
@@ -81,10 +81,16 @@ public class ClienteService : IClienteService
 
     private static bool IsEmailValido(string email)
     {
-        var at = email.IndexOf('@');
-        if (at <= 0 || at == email.Length - 1) return false;
-        var dominio = email[(at + 1)..];
-        return dominio.Contains('.') && dominio.Length >= 3;
+        try
+        {
+            var addr = new System.Net.Mail.MailAddress(email);
+            // Exige que o domínio contenha pelo menos um ponto (ex.: rejeita "user@s")
+            return addr.Address == email && addr.Host.Contains('.');
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     private static bool IsTelefoneValido(string telefone)

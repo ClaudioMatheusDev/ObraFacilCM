@@ -1,6 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Extensions.Logging;
-using System.Windows;
+using ObraFacil.Wpf.Services;
 
 namespace ObraFacil.Wpf.ViewModels;
 
@@ -19,12 +19,14 @@ public abstract partial class ViewModelBase : ObservableObject
 
     /// <summary>Logger da categoria do tipo concreto do ViewModel.</summary>
     protected readonly ILogger Logger;
+    protected readonly IDialogService Dialogs;
 
     /// <summary>Inicializa o ViewModel criando o logger para o tipo concreto.</summary>
     /// <param name="loggerFactory">Fábrica de loggers injetada pelo container DI.</param>
-    protected ViewModelBase(ILoggerFactory loggerFactory)
+    protected ViewModelBase(ILoggerFactory loggerFactory, IDialogService dialogs)
     {
         Logger = loggerFactory.CreateLogger(GetType());
+        Dialogs = dialogs;
     }
 
     /// <summary>
@@ -47,7 +49,7 @@ public abstract partial class ViewModelBase : ObservableObject
         {
             Logger.LogError(ex, "Erro em {ViewModel}: {Message}", GetType().Name, ex.Message);
             var msg = mensagemErro ?? "Ocorreu um erro inesperado.";
-            MessageBox.Show($"{msg}\n\n{ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            Dialogs.ShowError($"{msg}\n\n{ex.Message}");
         }
         finally { IsBusy = false; }
     }

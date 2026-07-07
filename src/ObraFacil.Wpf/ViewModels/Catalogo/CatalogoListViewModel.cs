@@ -4,8 +4,8 @@ using Microsoft.Extensions.Logging;
 using ObraFacil.Application.DTOs;
 using ObraFacil.Application.Interfaces;
 using ObraFacil.Domain.Enums;
+using ObraFacil.Wpf.Services;
 using System.Collections.ObjectModel;
-using System.Windows;
 
 namespace ObraFacil.Wpf.ViewModels.Catalogo;
 
@@ -16,6 +16,7 @@ namespace ObraFacil.Wpf.ViewModels.Catalogo;
 public partial class CatalogoListViewModel : ViewModelBase
 {
     private readonly IItemCatalogoService _service;
+    private readonly IWindowFactory _windows;
 
     /// <summary>Texto de busca digitado pelo usuário. Ao ser alterado, dispara novo carregamento.</summary>
     [ObservableProperty] string?          _busca;
@@ -46,10 +47,12 @@ public partial class CatalogoListViewModel : ViewModelBase
     public ObservableCollection<ItemCatalogoDto> Itens { get; } = [];
 
     /// <summary>Inicializa o ViewModel com o serviço de catálogo e a fábrica de loggers.</summary>
-    public CatalogoListViewModel(IItemCatalogoService service, ILoggerFactory loggerFactory)
-        : base(loggerFactory)
+    public CatalogoListViewModel(IItemCatalogoService service, IWindowFactory windows,
+        IDialogService dialogs, ILoggerFactory loggerFactory)
+        : base(loggerFactory, dialogs)
     {
         _service = service;
+        _windows = windows;
         Title    = "Catálogo";
     }
 
@@ -67,7 +70,7 @@ public partial class CatalogoListViewModel : ViewModelBase
     [RelayCommand]
     void NovoItem()
     {
-        var win = new Views.Catalogo.ItemCatalogoFormWindow();
+        var win = _windows.CreateItemCatalogoFormWindow();
         if (win.ShowDialog() == true) CarregarCommand.Execute(null);
     }
 
@@ -76,7 +79,7 @@ public partial class CatalogoListViewModel : ViewModelBase
     void EditarItem(ItemCatalogoDto? item)
     {
         if (item is null) return;
-        var win = new Views.Catalogo.ItemCatalogoFormWindow(item);
+        var win = _windows.CreateItemCatalogoFormWindow(item);
         if (win.ShowDialog() == true) CarregarCommand.Execute(null);
     }
 
@@ -85,9 +88,7 @@ public partial class CatalogoListViewModel : ViewModelBase
     async Task ExcluirItemAsync(ItemCatalogoDto? item)
     {
         if (item is null) return;
-        var r = MessageBox.Show($"Excluir '{item.Nome}'?", "Confirmar",
-            MessageBoxButton.YesNo, MessageBoxImage.Warning);
-        if (r != MessageBoxResult.Yes) return;
+        if (!Dialogs.Confirm($"Excluir '{item.Nome}'?")) return;
         await ExecuteSafeAsync(() => _service.ExcluirAsync(item.Id));
         await CarregarAsync();
     }

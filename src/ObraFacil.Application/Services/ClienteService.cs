@@ -69,8 +69,17 @@ public class ClienteService : IClienteService
 
     public async Task ExcluirAsync(int id, CancellationToken ct = default)
     {
-        await _repo.DeleteAsync(id, ct);
-        _logger.LogInformation("Cliente {Id} excluído.", id);
+        try
+        {
+            await _repo.DeleteAsync(id, ct);
+            _logger.LogInformation("Cliente {Id} excluído.", id);
+        }
+        catch (Exception ex) when (ex.GetType().FullName == "Microsoft.EntityFrameworkCore.DbUpdateException")
+        {
+            throw new ObraFacilException(
+                "Não foi possível excluir o cliente porque existem orçamentos vinculados a ele.",
+                ex);
+        }
     }
 
     private static void ValidarDto(ClienteInputDto dto)

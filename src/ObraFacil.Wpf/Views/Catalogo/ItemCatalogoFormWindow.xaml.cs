@@ -1,6 +1,7 @@
 using ObraFacil.Application.DTOs;
 using ObraFacil.Application.Interfaces;
 using ObraFacil.Domain.Enums;
+using ObraFacil.Wpf.Services;
 using System.Windows;
 
 namespace ObraFacil.Wpf.Views.Catalogo;
@@ -9,11 +10,14 @@ public partial class ItemCatalogoFormWindow : Window
 {
     private readonly ItemCatalogoDto? _original;
     private readonly IItemCatalogoService _service;
+    private readonly IDialogService _dialogs;
 
-    public ItemCatalogoFormWindow(ItemCatalogoDto? item = null)
+    public ItemCatalogoFormWindow(IItemCatalogoService service, IDialogService dialogs,
+        ItemCatalogoDto? item = null)
     {
         InitializeComponent();
-        _service  = App.GetService<IItemCatalogoService>();
+        _service  = service;
+        _dialogs  = dialogs;
         _original = item;
 
         CboTipo.ItemsSource     = Enum.GetValues<TipoItem>().Cast<TipoItem>().ToList();
@@ -40,7 +44,7 @@ public partial class ItemCatalogoFormWindow : Window
     {
         if (string.IsNullOrWhiteSpace(TxtNome.Text))
         {
-            MessageBox.Show("Informe o nome do item.", "Atenção");
+            _dialogs.ShowWarning("Informe o nome do item.");
             return;
         }
         if (!decimal.TryParse(TxtPreco.Text.Replace(",", "."),
@@ -48,7 +52,7 @@ public partial class ItemCatalogoFormWindow : Window
                 System.Globalization.CultureInfo.InvariantCulture,
                 out decimal preco) || preco < 0)
         {
-            MessageBox.Show("Preço inválido.", "Atenção");
+            _dialogs.ShowWarning("Preço inválido.");
             return;
         }
 
@@ -71,7 +75,7 @@ public partial class ItemCatalogoFormWindow : Window
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Erro ao salvar: {ex.Message}", "Erro");
+            _dialogs.ShowError($"Erro ao salvar: {ex.Message}");
         }
     }
 

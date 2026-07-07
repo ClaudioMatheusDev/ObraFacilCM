@@ -3,7 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using ObraFacil.Application.Interfaces;
 using ObraFacil.Domain.Interfaces;
-using System.Windows;
+using ObraFacil.Wpf.Services;
 
 namespace ObraFacil.Wpf.ViewModels.Configuracoes;
 
@@ -32,7 +32,7 @@ public partial class ConfiguracoesViewModel : ViewModelBase
 
     /// <summary>Inicializa o ViewModel com repositório de configurações, serviço de backup e f\u00e1brica de loggers.</summary>
     public ConfiguracoesViewModel(IConfiguracaoRepository repo, IBackupService backup,
-        ILoggerFactory loggerFactory) : base(loggerFactory)
+        IDialogService dialogs, ILoggerFactory loggerFactory) : base(loggerFactory, dialogs)
     {
         _repo   = repo;
         _backup = backup;
@@ -66,7 +66,7 @@ public partial class ConfiguracoesViewModel : ViewModelBase
             c.ValidadePadraoEmDias    = ValidadePadraoEmDias;
             c.ProximoNumeroOrcamento  = ProximoNumeroOrcamento;
             await _repo.SalvarAsync(c);
-            MessageBox.Show("Configurações salvas com sucesso.", "Sucesso");
+            Dialogs.ShowInfo("Configurações salvas com sucesso.", "Sucesso");
         });
 
     /// <summary>Exporta o banco SQLite para a pasta de backups e informa o caminho resultante.</summary>
@@ -75,7 +75,7 @@ public partial class ConfiguracoesViewModel : ViewModelBase
         => await ExecuteSafeAsync(async () =>
         {
             var path = await _backup.ExportarAsync();
-            MessageBox.Show($"Backup salvo em:\n{path}", "Backup concluído");
+            Dialogs.ShowInfo($"Backup salvo em:\n{path}", "Backup concluído");
         }, "Erro ao exportar backup.");
 
     /// <summary>
@@ -86,17 +86,14 @@ public partial class ConfiguracoesViewModel : ViewModelBase
     async Task RestaurarBackupAsync()
         => await ExecuteSafeAsync(async () =>
         {
-            var dlg = new Microsoft.Win32.OpenFileDialog
-            {
-                Title  = "Selecionar backup",
-                Filter = "SQLite|*.db;*.sqlite|Todos|*.*"
-            };
-            if (dlg.ShowDialog() != true) return;
-            var r = MessageBox.Show(
+            var arquivo = Dialogs.SelectFile("Selecionar backup", "SQLite|*.db;*.sqlite|Todos|*.*");
+            if (arquivo is null) return;
+
+            if (!Dialogs.Confirm(
                 "Restaurar o backup vai sobrescrever todos os dados atuais. Continuar?",
-                "Atenção", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-            if (r != MessageBoxResult.Yes) return;
-            await _backup.RestaurarAsync(dlg.FileName);
-            MessageBox.Show("Backup restaurado. Reinicie o aplicativo.", "Sucesso");
+                "Atenção")) return;
+
+            await _backup.RestaurarAsync(arquivo);
+            Dialogs.ShowInfo("Backup restaurado. Reinicie o aplicativo.", "Sucesso");
         }, "Erro ao restaurar backup.");
 }

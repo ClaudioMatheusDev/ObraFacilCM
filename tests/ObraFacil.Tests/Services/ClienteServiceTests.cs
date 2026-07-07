@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.EntityFrameworkCore;
 using NSubstitute;
 using ObraFacil.Application.DTOs;
 using ObraFacil.Application.Services;
@@ -74,5 +75,16 @@ public class ClienteServiceTests
 
         var dto = new ClienteInputDto("Teste", null, "email-invalido", null, null, null);
         await Assert.ThrowsAsync<ObraFacilException>(() => _sut.AtualizarAsync(1, dto));
+    }
+
+    [Fact]
+    public async Task ExcluirAsync_FalhaDeRestricao_LancaExcecaoAmigavel()
+    {
+        _repo.DeleteAsync(1, Arg.Any<CancellationToken>())
+             .Returns(Task.FromException(new DbUpdateException("fk", new Exception("constraint"))));
+
+        var ex = await Assert.ThrowsAsync<ObraFacilException>(() => _sut.ExcluirAsync(1));
+
+        Assert.Contains("orçamentos vinculados", ex.Message);
     }
 }

@@ -1,6 +1,7 @@
 using ObraFacil.Application.DTOs;
 using ObraFacil.Application.Interfaces;
 using ObraFacil.Domain.Exceptions;
+using ObraFacil.Wpf.Services;
 using System.Windows;
 
 namespace ObraFacil.Wpf.Views.Clientes;
@@ -8,6 +9,7 @@ namespace ObraFacil.Wpf.Views.Clientes;
 public partial class ClienteFormWindow : Window
 {
     private readonly IClienteService _service;
+    private readonly IDialogService _dialogs;
     private int? _clienteId;
 
     public string Titulo    { get => (string)GetValue(TituloProperty); set => SetValue(TituloProperty, value); }
@@ -22,9 +24,10 @@ public partial class ClienteFormWindow : Window
     public string? Endereco   { get; set; }
     public string? Observacoes { get; set; }
 
-    public ClienteFormWindow(IClienteService service)
+    public ClienteFormWindow(IClienteService service, IDialogService dialogs)
     {
         _service   = service;
+        _dialogs   = dialogs;
         DataContext = this;
         Titulo     = "Novo Cliente";
         InitializeComponent();
@@ -45,7 +48,7 @@ public partial class ClienteFormWindow : Window
 
     private async void BtnSalvar_Click(object sender, RoutedEventArgs e)
     {
-        if (string.IsNullOrWhiteSpace(Nome)) { MessageBox.Show("Nome é obrigatório.", "Atenção"); return; }
+        if (string.IsNullOrWhiteSpace(Nome)) { _dialogs.ShowWarning("Nome é obrigatório."); return; }
         try
         {
             var dto = new ClienteInputDto(Nome, Telefone, Email, Documento, Endereco, Observacoes);
@@ -53,7 +56,7 @@ public partial class ClienteFormWindow : Window
             else                     await _service.CriarAsync(dto);
             DialogResult = true;
         }
-        catch (ObraFacilException ex) { MessageBox.Show(ex.Message, "Erro"); }
+        catch (ObraFacilException ex) { _dialogs.ShowError(ex.Message); }
     }
 
     private void BtnCancelar_Click(object sender, RoutedEventArgs e) => DialogResult = false;

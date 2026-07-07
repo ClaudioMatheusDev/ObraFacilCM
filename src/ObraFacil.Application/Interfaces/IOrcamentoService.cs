@@ -31,6 +31,12 @@ public interface IOrcamentoService
     /// <exception cref="ObraFacil.Domain.Exceptions.ObraFacilException">Lançado se a validação falhar.</exception>
     Task<OrcamentoDto> CriarAsync(OrcamentoInputDto dto, CancellationToken ct = default);
 
+    /// <summary>Cria um novo orçamento a partir dos dados de outro orçamento existente.</summary>
+    /// <param name="id">Identificador do orçamento de origem.</param>
+    /// <param name="ct">Token de cancelamento.</param>
+    /// <exception cref="ObraFacil.Domain.Exceptions.NotFoundException">Lançado se o orçamento de origem não existir.</exception>
+    Task<OrcamentoDto> DuplicarAsync(int id, CancellationToken ct = default);
+
     /// <summary>Atualiza os dados do cabeçalho e itens de um orçamento existente.</summary>
     /// <param name="id">Identificador do orçamento a ser atualizado.</param>
     /// <param name="dto">Novos dados do orçamento.</param>

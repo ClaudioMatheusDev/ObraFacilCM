@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using ObraFacil.Wpf.Startup;
 using ObraFacil.Wpf.Views;
 using System.IO;
@@ -16,14 +17,30 @@ public partial class App : System.Windows.Application
     {
         base.OnStartup(e);
 
-        var dbPath = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "ObraFacil", "obrafacil.db");
-        Directory.CreateDirectory(Path.GetDirectoryName(dbPath)!);
+        try
+        {
+            var dbPath = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "ObraFacil", "obrafacil.db");
+            Directory.CreateDirectory(Path.GetDirectoryName(dbPath)!);
 
-        _services = AppBootstrap.ConfigureServices(dbPath);
-        await AppBootstrap.InitializeDatabaseAsync(_services);
+            _services = AppBootstrap.ConfigureServices(dbPath);
+            await AppBootstrap.InitializeDatabaseAsync(_services);
 
-        GetService<MainWindow>().Show();
+            GetService<MainWindow>().Show();
+        }
+        catch (Exception ex)
+        {
+            var logger = _services?.GetService<ILogger<App>>();
+            logger?.LogCritical(ex, "Falha ao inicializar o aplicativo ObraFácil.");
+
+            MessageBox.Show(
+                $"Não foi possível iniciar o ObraFácil.\n\nDetalhes: {ex.Message}",
+                "Erro de inicialização",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+
+            Shutdown(-1);
+        }
     }
 }

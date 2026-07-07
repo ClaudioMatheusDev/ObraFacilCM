@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using ObraFacil.Infrastructure;
 using ObraFacil.Infrastructure.Data;
 using ObraFacil.Infrastructure.Seed;
+using ObraFacil.Wpf.Services;
 using ObraFacil.Wpf.ViewModels.Catalogo;
 using ObraFacil.Wpf.ViewModels.Clientes;
 using ObraFacil.Wpf.ViewModels.Configuracoes;
@@ -49,6 +50,8 @@ internal static class AppBootstrap
         services.AddTransient<MainWindow>();
         services.AddTransient<ClienteFormWindow>();
         services.AddTransient<OrcamentoFormWindow>();
+        services.AddSingleton<IWindowFactory, WindowFactory>();
+        services.AddSingleton<IDialogService, DialogService>();
 
         return services.BuildServiceProvider();
     }

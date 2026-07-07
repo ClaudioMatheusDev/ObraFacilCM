@@ -4,10 +4,10 @@ using Microsoft.Extensions.Logging;
 using ObraFacil.Application.DTOs;
 using ObraFacil.Application.Interfaces;
 using ObraFacil.Domain.Enums;
+using ObraFacil.Wpf.Services;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Windows;
 
 namespace ObraFacil.Wpf.ViewModels.Orcamentos;
 
@@ -22,6 +22,7 @@ public partial class OrcamentoFormViewModel : ViewModelBase
     private readonly IOrcamentoService    _orcamentos;
     private readonly IClienteService      _clientes;
     private readonly IItemCatalogoService _catalogo;
+    private readonly IWindowFactory       _windows;
 
     /// <summary>Id do orçamento em edição, ou <c>null</c> quando se trata de um novo orçamento.</summary>
     private int? _orcamentoId;
@@ -46,11 +47,13 @@ public partial class OrcamentoFormViewModel : ViewModelBase
     /// <summary>Inicializa o ViewModel com os serviços necessários e registra os handlers de notificação dos itens.</summary>
     public OrcamentoFormViewModel(IOrcamentoService orcamentos,
         IClienteService clientes, IItemCatalogoService catalogo,
-        ILoggerFactory loggerFactory) : base(loggerFactory)
+        IWindowFactory windows, IDialogService dialogs, ILoggerFactory loggerFactory)
+        : base(loggerFactory, dialogs)
     {
         _orcamentos = orcamentos;
         _clientes   = clientes;
         _catalogo   = catalogo;
+        _windows    = windows;
         Title       = "Novo Orçamento";
 
         Itens = [];
@@ -139,10 +142,10 @@ public partial class OrcamentoFormViewModel : ViewModelBase
         await ExecuteSafeAsync(async () =>
         {
             var itens = await _catalogo.ListarAsync();
-            if (!itens.Any()) { MessageBox.Show("Catálogo vazio.", "Aviso"); return; }
+            if (!itens.Any()) { Dialogs.ShowWarning("Catálogo vazio.", "Aviso"); return; }
 
             // Janela simples de seleção
-            var win = new Views.Orcamentos.SelecionarCatalogoWindow(itens);
+            var win = _windows.CreateSelecionarCatalogoWindow(itens);
             if (win.ShowDialog() != true || win.Selecionado is null) return;
             var s = win.Selecionado;
             Itens.Add(new ItemFormDto(s.Id, s.Nome, s.Unidade, s.PrecoUnitario, s.Categoria, 1, 0));
@@ -171,8 +174,8 @@ public partial class OrcamentoFormViewModel : ViewModelBase
     [RelayCommand]
     async Task SalvarAsync()
     {
-        if (ClienteSelecionado is null) { MessageBox.Show("Selecione um cliente.", "Atenção"); return; }
-        if (!Itens.Any()) { MessageBox.Show("Adicione pelo menos um item.", "Atenção"); return; }
+        if (ClienteSelecionado is null) { Dialogs.ShowWarning("Selecione um cliente."); return; }
+        if (!Itens.Any()) { Dialogs.ShowWarning("Adicione pelo menos um item."); return; }
 
         await ExecuteSafeAsync(async () =>
         {

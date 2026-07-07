@@ -14,6 +14,8 @@ namespace ObraFacil.Application.Services;
 /// </summary>
 public class OrcamentoService : IOrcamentoService
 {
+    private const int MaxTentativasCriacao = 3;
+
     private readonly IOrcamentoRepository      _orcamentos;
     private readonly IClienteRepository        _clientes;
     private readonly IConfiguracaoRepository   _config;
@@ -43,6 +45,54 @@ public class OrcamentoService : IOrcamentoService
         _ = await _clientes.GetByIdAsync(dto.ClienteId, ct)
             ?? throw new NotFoundException("Cliente", dto.ClienteId);
 
+        for (var tentativa = 1; tentativa <= MaxTentativasCriacao; tentativa++)
+        {
+            try
+            {
+                return await CriarComTransacaoAsync(dto, ct);
+            }
+            catch (Exception ex) when (IsDbUpdateException(ex) && tentativa < MaxTentativasCriacao)
+            {
+                _logger.LogWarning(ex,
+                    "Conflito ao criar orçamento. Tentativa {Tentativa}/{MaxTentativas}.",
+                    tentativa, MaxTentativasCriacao);
+            }
+            catch (Exception ex) when (IsDbUpdateException(ex))
+            {
+                throw new ObraFacilException(
+                    "Não foi possível criar o orçamento por conflito de gravação. Tente novamente.",
+                    ex);
+            }
+        }
+
+        throw new ObraFacilException("Não foi possível criar o orçamento.");
+    }
+
+    public async Task<OrcamentoDto> DuplicarAsync(int id, CancellationToken ct = default)
+    {
+        var origem = await ObterAsync(id, ct);
+        var copia = new OrcamentoInputDto(
+            origem.ClienteId,
+            origem.DataValidade,
+            origem.Desconto,
+            origem.Observacoes,
+            origem.CondicoesPagamento,
+            origem.Itens.Select(i => new ItemOrcamentoInputDto(
+                i.ItemCatalogoId,
+                i.Descricao,
+                i.Unidade,
+                i.PrecoUnitario,
+                i.Categoria,
+                i.Quantidade,
+                i.DescontoItem)).ToList());
+
+        var duplicado = await CriarAsync(copia, ct);
+        _logger.LogInformation("Orcamento {OrigemId} duplicado como {NovoNumero}.", id, duplicado.Numero);
+        return duplicado;
+    }
+
+    private async Task<OrcamentoDto> CriarComTransacaoAsync(OrcamentoInputDto dto, CancellationToken ct)
+    {
         await _uow.BeginAsync(ct);
         try
         {
@@ -76,6 +126,10 @@ public class OrcamentoService : IOrcamentoService
             ?? throw new NotFoundException("Orcamento", id);
         if (orc.Status != StatusOrcamento.Rascunho)
             throw new ObraFacilException("Somente rascunhos podem ser editados.");
+
+        _ = await _clientes.GetByIdAsync(dto.ClienteId, ct)
+            ?? throw new NotFoundException("Cliente", dto.ClienteId);
+
         orc.ClienteId = dto.ClienteId; orc.DataValidade = dto.DataValidade;
         orc.Desconto = dto.Desconto;
         orc.Observacoes = dto.Observacoes?.Trim();
@@ -92,6 +146,12 @@ public class OrcamentoService : IOrcamentoService
     {
         var orc = await _orcamentos.GetByIdAsync(id, ct) ?? throw new NotFoundException("Orcamento", id);
         var anterior = orc.Status;
+
+        ValidarTransicaoStatus(anterior, novoStatus);
+
+        if (anterior == novoStatus)
+            return;
+
         orc.Status = novoStatus; orc.AlteradoEm = DateTime.UtcNow;
         await _orcamentos.UpdateAsync(orc, ct);
         _logger.LogInformation("Orcamento {Id}: status {Anterior} -> {Novo}.", id, anterior, novoStatus);
@@ -102,6 +162,28 @@ public class OrcamentoService : IOrcamentoService
         await _orcamentos.DeleteAsync(id, ct);
         _logger.LogInformation("Orcamento {Id} excluido.", id);
     }
+
+    private static void ValidarTransicaoStatus(StatusOrcamento atual, StatusOrcamento novo)
+    {
+        if (atual == novo)
+            return;
+
+        var permitidos = atual switch
+        {
+            StatusOrcamento.Rascunho => new[] { StatusOrcamento.Enviado },
+            StatusOrcamento.Enviado  => new[] { StatusOrcamento.Aprovado, StatusOrcamento.Recusado },
+            StatusOrcamento.Aprovado => [],
+            StatusOrcamento.Recusado => [],
+            _ => []
+        };
+
+        if (!permitidos.Contains(novo))
+            throw new ObraFacilException($"Não é permitido alterar orçamento de {atual} para {novo}.");
+    }
+
+    private static bool IsDbUpdateException(Exception ex)
+        => ex.GetType().FullName == "Microsoft.EntityFrameworkCore.DbUpdateException"
+           || (ex.InnerException is not null && IsDbUpdateException(ex.InnerException));
 
     // snapshot: preco/descricao congelados no momento da adicao
     private static ItemOrcamento MapItem(ItemOrcamentoInputDto d) => new()

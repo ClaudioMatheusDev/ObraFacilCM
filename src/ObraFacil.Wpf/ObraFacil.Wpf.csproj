@@ -5,20 +5,16 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+    <UseSharedCompilation>false</UseSharedCompilation>
     <RootNamespace>ObraFacil.Wpf</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ObraFacil.Application\ObraFacil.Application.csproj" />
     <ProjectReference Include="..\ObraFacil.Infrastructure\ObraFacil.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.*" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.*">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.*" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.*" />
   </ItemGroup>

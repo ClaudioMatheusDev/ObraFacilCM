@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using ObraFacil.Application.DTOs;
 using ObraFacil.Application.Interfaces;
+using ObraFacil.Wpf.Services;
 using ObraFacil.Wpf.Views.Clientes;
 using System.Collections.ObjectModel;
 
@@ -15,6 +16,7 @@ namespace ObraFacil.Wpf.ViewModels.Clientes;
 public partial class ClientesListViewModel : ViewModelBase
 {
     private readonly IClienteService _service;
+    private readonly IWindowFactory _windows;
 
     /// <summary>Texto de busca digitado pelo usuário. Ao ser alterado, dispara novo carregamento da lista.</summary>
     [ObservableProperty] string _busca = string.Empty;
@@ -26,10 +28,12 @@ public partial class ClientesListViewModel : ViewModelBase
     public ObservableCollection<ClienteDto> Clientes { get; } = [];
 
     /// <summary>Inicializa o ViewModel com o serviço de clientes e a fábrica de loggers.</summary>
-    public ClientesListViewModel(IClienteService service, ILoggerFactory loggerFactory)
-        : base(loggerFactory)
+    public ClientesListViewModel(IClienteService service, IWindowFactory windows,
+        IDialogService dialogs, ILoggerFactory loggerFactory)
+        : base(loggerFactory, dialogs)
     {
         _service = service;
+        _windows = windows;
         Title    = "Clientes";
     }
 
@@ -47,7 +51,7 @@ public partial class ClientesListViewModel : ViewModelBase
     [RelayCommand]
     void NovoCliente()
     {
-        var win = App.GetService<ClienteFormWindow>();
+        var win = _windows.CreateClienteFormWindow();
         win.ShowDialog();
         CarregarCommand.Execute(null);
     }
@@ -57,7 +61,7 @@ public partial class ClientesListViewModel : ViewModelBase
     void EditarCliente(ClienteDto? cliente)
     {
         if (cliente is null) return;
-        var win = App.GetService<ClienteFormWindow>();
+        var win = _windows.CreateClienteFormWindow();
         win.CarregarCliente(cliente.Id);
         win.ShowDialog();
         CarregarCommand.Execute(null);
@@ -68,10 +72,7 @@ public partial class ClientesListViewModel : ViewModelBase
     async Task ExcluirClienteAsync(ClienteDto? cliente)
     {
         if (cliente is null) return;
-        var r = System.Windows.MessageBox.Show(
-            $"Excluir cliente \"{cliente.Nome}\"?", "Confirmar",
-            System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Warning);
-        if (r != System.Windows.MessageBoxResult.Yes) return;
+        if (!Dialogs.Confirm($"Excluir cliente \"{cliente.Nome}\"?")) return;
         await ExecuteSafeAsync(() => _service.ExcluirAsync(cliente.Id));
         await CarregarAsync();
     }

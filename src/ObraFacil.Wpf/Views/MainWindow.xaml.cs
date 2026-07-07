@@ -9,7 +9,21 @@ namespace ObraFacil.Wpf.Views;
 
 public partial class MainWindow : Window
 {
-    public MainWindow() { InitializeComponent(); Loaded += (_, _) => Navegar("Orcamentos"); }
+    private readonly OrcamentosListPage _orcamentos;
+    private readonly ClientesListPage _clientes;
+    private readonly CatalogoListPage _catalogo;
+    private readonly ConfiguracoesPage _configuracoes;
+
+    public MainWindow(OrcamentosListPage orcamentos, ClientesListPage clientes,
+        CatalogoListPage catalogo, ConfiguracoesPage configuracoes)
+    {
+        InitializeComponent();
+        _orcamentos     = orcamentos;
+        _clientes        = clientes;
+        _catalogo        = catalogo;
+        _configuracoes   = configuracoes;
+        Loaded += (_, _) => Navegar("Orcamentos");
+    }
 
     private void NavClick(object sender, RoutedEventArgs e)
         => Navegar(((Button)sender).Tag.ToString()!);
@@ -18,11 +32,11 @@ public partial class MainWindow : Window
     {
         Page page = destino switch
         {
-            "Orcamentos" => App.GetService<OrcamentosListPage>(),
-            "Clientes"   => App.GetService<ClientesListPage>(),
-            "Catalogo"   => App.GetService<CatalogoListPage>(),
-            "Config"     => App.GetService<ConfiguracoesPage>(),
-            _            => App.GetService<OrcamentosListPage>()
+            "Orcamentos" => _orcamentos,
+            "Clientes"   => _clientes,
+            "Catalogo"   => _catalogo,
+            "Config"     => _configuracoes,
+            _            => _orcamentos
         };
         MainFrame.Navigate(page);
     }

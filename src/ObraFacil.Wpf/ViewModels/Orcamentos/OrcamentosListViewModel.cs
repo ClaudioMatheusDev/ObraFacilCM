@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using ObraFacil.Application.DTOs;
 using ObraFacil.Application.Interfaces;
 using ObraFacil.Domain.Enums;
+using ObraFacil.Wpf.Services;
 using ObraFacil.Wpf.Views.Orcamentos;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -18,6 +19,7 @@ public partial class OrcamentosListViewModel : ViewModelBase
 {
     private readonly IOrcamentoService _service;
     private readonly IPdfService       _pdf;
+    private readonly IWindowFactory    _windows;
 
     /// <summary>Texto de busca. Ao ser alterado, dispara novo carregamento da lista.</summary>
     [ObservableProperty] string?          _busca;
@@ -51,9 +53,10 @@ public partial class OrcamentosListViewModel : ViewModelBase
 
     /// <summary>Inicializa o ViewModel com os serviços de orçamento, PDF e a fábrica de loggers.</summary>
     public OrcamentosListViewModel(IOrcamentoService service, IPdfService pdf,
-        ILoggerFactory loggerFactory) : base(loggerFactory)
+        IWindowFactory windows, IDialogService dialogs, ILoggerFactory loggerFactory)
+        : base(loggerFactory, dialogs)
     {
-        _service = service; _pdf = pdf;
+        _service = service; _pdf = pdf; _windows = windows;
         Title    = "Orçamentos";
     }
 
@@ -71,7 +74,7 @@ public partial class OrcamentosListViewModel : ViewModelBase
     [RelayCommand]
     void NovoOrcamento()
     {
-        var win = App.GetService<OrcamentoFormWindow>();
+        var win = _windows.CreateOrcamentoFormWindow();
         win.ShowDialog();
         CarregarCommand.Execute(null);
     }
@@ -81,7 +84,7 @@ public partial class OrcamentosListViewModel : ViewModelBase
     void EditarOrcamento(OrcamentoDto? orc)
     {
         if (orc is null) return;
-        var win = App.GetService<OrcamentoFormWindow>();
+        var win = _windows.CreateOrcamentoFormWindow();
         win.CarregarOrcamento(orc.Id);
         win.ShowDialog();
         CarregarCommand.Execute(null);
@@ -101,15 +104,27 @@ public partial class OrcamentosListViewModel : ViewModelBase
         }, "Erro ao gerar PDF.");
     }
 
+    /// <summary>Cria um novo orçamento rascunho com base no orçamento informado.</summary>
+    [RelayCommand]
+    async Task DuplicarOrcamentoAsync(OrcamentoDto? orc)
+    {
+        if (orc is null) return;
+        if (!Dialogs.Confirm($"Duplicar orçamento {orc.Numero}?")) return;
+
+        await ExecuteSafeAsync(async () =>
+        {
+            var duplicado = await _service.DuplicarAsync(orc.Id);
+            Dialogs.ShowInfo($"Orçamento {duplicado.Numero} criado como cópia.", "Orçamento duplicado");
+        }, "Erro ao duplicar orçamento.");
+        await CarregarAsync();
+    }
+
     /// <summary>Solicita confirmação e exclui o orçamento informado.</summary>
     [RelayCommand]
     async Task ExcluirOrcamentoAsync(OrcamentoDto? orc)
     {
         if (orc is null) return;
-        var r = System.Windows.MessageBox.Show(
-            $"Excluir orçamento {orc.Numero}?", "Confirmar",
-            System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Warning);
-        if (r != System.Windows.MessageBoxResult.Yes) return;
+        if (!Dialogs.Confirm($"Excluir orçamento {orc.Numero}?")) return;
         await ExecuteSafeAsync(() => _service.ExcluirAsync(orc.Id));
         await CarregarAsync();
     }

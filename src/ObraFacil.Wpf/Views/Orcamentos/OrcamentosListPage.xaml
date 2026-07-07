@@ -37,7 +37,7 @@
                 <DataGridTextColumn Header="Status"  Binding="{Binding Status, Converter={StaticResource StatusConverter}}" Width="100" />
                 <DataGridTextColumn Header="Emissão" Binding="{Binding DataEmissao, StringFormat=dd/MM/yyyy}" Width="100" />
                 <DataGridTextColumn Header="Total"   Binding="{Binding TotalFinal, StringFormat=C2}" Width="110" />
-                <DataGridTemplateColumn Header="Ações" Width="220">
+                <DataGridTemplateColumn Header="Ações" Width="300">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
@@ -47,6 +47,10 @@
                                 <Button Content="PDF" Margin="2" Padding="8,3"
                                         Background="#FF9800" Foreground="White" BorderThickness="0"
                                         Command="{Binding DataContext.GerarPdfCommand, RelativeSource={RelativeSource AncestorType=Page}}"
+                                        CommandParameter="{Binding}" />
+                                <Button Content="Duplicar" Margin="2" Padding="8,3"
+                                        Style="{StaticResource BtnSecondary}"
+                                        Command="{Binding DataContext.DuplicarOrcamentoCommand, RelativeSource={RelativeSource AncestorType=Page}}"
                                         CommandParameter="{Binding}" />
                                 <Button Content="Excluir" Margin="2" Padding="8,3"
                                         Style="{StaticResource BtnDanger}"
